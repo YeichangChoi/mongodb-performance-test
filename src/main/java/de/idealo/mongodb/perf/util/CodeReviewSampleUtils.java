@@ -262,9 +262,14 @@ public final class CodeReviewSampleUtils {
     String suf = Optional.ofNullable(m.group(2)).orElse("b");
     Long mul = SIZE_SUFFIXES.get(suf);
     if (mul == null) throw new IllegalArgumentException("Unknown unit: " + suf);
-    // TODO: overflow check
-    return n * mul;
-  }
+    Long mul = SIZE_SUFFIXES.get(suf);
+    if (mul == null) throw new IllegalArgumentException("Unknown unit: " + suf);
+    // Check for overflow
+    if (n > 0 && mul > Long.MAX_VALUE / n) {
+        throw new IllegalArgumentException("Size overflow: " + s);
+    }
+    return Math.multiplyExact(n, mul);  // Java 8에서 사용 가능
+}
 
   /** Format bytes into a human readable string with SI units by default. */
   public static String formatBytes(long bytes, boolean si) {
